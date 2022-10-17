@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+	<meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Lineare-Regression</title>
+
+    <style type="text/css">
+        td, th {
+            padding: 5px;
+        }
+
+        td[data-useable="false"] {
+            background-color: red;
+        }
+    </style>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.3/css/all.css" integrity="sha384-SZXxX4whJ79/gErwcOYf+zWLeJdY/qpuqC4cAa9rOGUstPomtqpuNWT9wdPEn2fk" crossorigin="anonymous">
+</head>
+<body class="mb-5 mt-5">
+	<div class="container">
+		<div class="row">
+			<div class="col-12">
+				<a href="/" class="btn btn-secondary mb-5">Zurück zur Übersicht</a>
+				<h1>Lineare-Regression</h1>
+				<p>Trage zuerst die einzelnen Perioden inkl. Nachfrage ein. Klicke anschließend auf "Tabelle errechnen"</p>
+			</div>
+			<div class="col-12">
+				<hr />
+				<form id="formular" class="mb-3">
+					<div class="row">
+						<div class="col-12 col-md-6 col-lg-4">
+							<label for="periode" class="form-label">Periode</label>
+							<input type="number" class="form-control" id="periode" placeholder="Periode" required />
+						</div>
+						<div class="col-12 col-md-6 col-lg-4">
+							<label for="nachfrage" class="form-label">Nachfrage</label>
+							<input type="number" class="form-control" id="nachfrage" placeholder="Nachfrage" required />
+						</div>
+						<div class="col-12 mt-3">
+							<button type="submit" id="eintragen" class="btn btn-primary">Eintragen</button>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-12">
+				<hr />
+				<div class="row">
+					<div class="col-6" id="startCalculate">
+						<button type="button" id="tabelleRechnen" class="btn btn-secondary">Tabelle errechnen</button>
+					</div>
+					<div class="col-12 justify-content-center d-none" id="newCalculation">
+						<a href="" class="btn btn-warning btn-lg">Neue Rechnung</a>
+					</div>
+				</div>
+			</div>
+			<div class="col-12 d-none" id="ergebnisse">
+				<div class="row mb-3">
+					<div class="col-4">
+						<label for="mittelwertX" class="form-label">Mittelwert x</label>
+						<input type="number" disabled class="form-control disabled" id="mittelwertX" />
+					</div>
+					<div class="col-4">
+						<label for="mittelwertY" class="form-label">Mittelwert y</label>
+						<input type="number" disabled class="form-control disabled" id="mittelwertY" />
+					</div>
+				</div>
+				<div class="row mb-3">
+					<div class="col-4">
+						<label for="standardabweichungX" class="form-label">Standardabweichung x (Periode)</label>
+						<input type="number" disabled class="form-control disabled" id="standardabweichungX" />
+					</div>
+					<div class="col-4">
+						<label for="standardabweichungY" class="form-label">Standardabweichung Y (Nachfrage)</label>
+						<input type="number" disabled class="form-control disabled" id="standardabweichungY" />
+					</div>
+					<div class="col-4">
+						<label for="korrelation" class="form-label">Korrelation</label>
+						<input type="number" disabled class="form-control disabled" id="korrelation" />
+					</div>
+				</div>
+				<div class="row mb-3">
+					<div class="col-4">
+						<label for="steigungsmass" class="form-label"><b>b</b> (Steigungsmaß)</label>
+						<input type="number" disabled class="form-control disabled" id="steigungsmass" />
+					</div>
+					<div class="col-4">
+						<label for="konstanteAchsenabschnitt" class="form-label"><b>a</b> (Konstante-Achsenabschnitt)</label>
+						<input type="number" disabled class="form-control disabled" id="konstanteAchsenabschnitt" />
+					</div>
+				</div>
+			</div>
+			<div class="col-12">
+				<div class="table-responsive">
+					<table class="table table-striped table-hover">
+						<thead>
+							<tr>
+								<th>Option</th>
+								<th>Periode</th>
+								<th colspan="2">Nachfrage</th>
+								<th>Prognose</th>
+							</tr>
+						</thead>
+						<tbody id="table"></tbody>
+					</table>		
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="container mb-5">
+		<div class="row mb-5">
+			<div class="col-12">
+				<div>
+					<canvas id="myChart"></canvas>
+				</div>
+			</div>
+		</div>
+	</div>
+
+    <script type="text/javascript">
+        const eintragenButton = getButtonElementById('eintragen');
+        const tabelleRechnen = getButtonElementById('tabelleRechnen');
+        const table = getTableElementById('table');
+        const periode = getInputElementById('periode');
+        const nachfrage = getInputElementById('nachfrage');
+        const ergebnisse = document.querySelector('#ergebnisse');
+
+		const mittelwertX = getInputElementById('mittelwertX');
+		const mittelwertY = getInputElementById('mittelwertY');
+		const standardabweichungX = getInputElementById('standardabweichungX');
+		const standardabweichungY = getInputElementById('standardabweichungY');
+		const korrelation = getInputElementById('korrelation');
+		const steigungsmass = getInputElementById('steigungsmass');
+		const konstanteAchsenabschnitt = getInputElementById('konstanteAchsenabschnitt');
+
+		let nachfrageValues = {};
+		let periodenValues = {};
+
+        window.sortedRows = [];
+        window.verwendeteZeit = 0;
+        window.nachfrageValues = nachfrageValues;
+        window.periodenValues = periodenValues;
+        window.prognoseValues = {};
+		window.periodeNachfrageValues = {}
+        window.standardabweichungX = null;
+        window.standardabweichungY = null;
+        window.korrelation = null;
+		window.steigungsmassB = null;
+		window.konstanteAchsenabschnittA = null;
+		window.letztePeriode = 0;
+
+		let tableIndex = 0;
+
+        eintragenButton.addEventListener('click', function (e) {
+            e.preventDefault();
+            checkAndSubmitForm();
+        });
+
+		tabelleRechnen.addEventListener('click', function (e) {
+            e.preventDefault();
+			ergebnisse.classList.remove('d-none');
+			periode.disabled = true;
+			nachfrage.disabled = true;
+			eintragenButton.disabled = true;
+			tabelleRechnen.disabled = true;
+
+			const newCalculation = document.querySelector('#newCalculation');
+			newCalculation.classList.remove('d-none');
+			newCalculation.classList.add('d-flex');
+			document.querySelector('#startCalculate').classList.add('d-none');
+
+			const deleteButtons = document.querySelectorAll('.delete-row-button');
+
+			for (let deleteButton of deleteButtons) {
+				deleteButton.disabled = true;
+			}
+
+			calcMittelwerte();
+        });
+
+		/**
+		 * Berechne Mittelwerte
+		 */
+		function calcMittelwerte() {
+			let periodeGesamt = 0;
+			let periodeZaehler = 0;
+			let nachfrageGesamt = 0;
+			let nachfrageZaehler = 0;
+
+			const perioden = window.periodenValues;
+			const nachfragen = window.nachfrageValues;
+
+			Object.keys(perioden).forEach(key => {
+				periodeGesamt = periodeGesamt + perioden[key];
+				periodeZaehler++;
+			});
+
+			Object.keys(nachfragen).forEach(key => {
+				nachfrageGesamt = nachfrageGesamt + nachfragen[key];
+				nachfrageZaehler++;
+			});
+
+			window.periodeGesamt = periodeGesamt;
+			window.nachfrageGesamt = nachfrageGesamt;
+			window.mittelwertPeriode = parseFloat(periodeGesamt / periodeZaehler);
+			window.mittelwertNachfrage = parseFloat(nachfrageGesamt / nachfrageZaehler);
+
+			mittelwertX.value = Math.round(window.mittelwertPeriode).toString();
+			mittelwertY.value = Math.round(window.mittelwertNachfrage).toString()
+
+			calculateStandardAbweichung();
+		}
+
+		/**
+		 * Berechne Standardabweichung
+		 */
+		function calculateStandardAbweichung() {
+			const xhrForStandardabweichung = new XMLHttpRequest();
+			xhrForStandardabweichung.open('POST', 'php/abweichung.php', true);
+
+			xhrForStandardabweichung.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+
+			xhrForStandardabweichung.onreadystatechange = function () {
+				if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+					const jsonResponse = JSON.parse(this.response);
+					window.standardabweichungX = parseFloat(jsonResponse[0]);
+					window.standardabweichungY = parseFloat(jsonResponse[1]);
+
+					standardabweichungX.value = Math.round(window.standardabweichungX).toString();
+					standardabweichungY.value = Math.round(window.standardabweichungY).toString();
+
+					calculateKorrelation();
+				}
+			}
+
+			const sendJson = {
+				x: periodenValues,
+				y: nachfrageValues
+			};
+
+			xhrForStandardabweichung.send(JSON.stringify(sendJson));
+		}
+
+		/**
+		 * Brechne Korrelation
+		 */
+		function calculateKorrelation() {
+			const xhrForStandardabweichung = new XMLHttpRequest();
+			xhrForStandardabweichung.open('POST', 'php/korrelation.php', true);
+
+			xhrForStandardabweichung.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+
+			xhrForStandardabweichung.onreadystatechange = function () {
+				if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+					window.korrelation = parseFloat(this.response);
+
+					korrelation.value = Math.round(window.korrelation).toString();
+
+					calcSteigungsmassB();
+				}
+			}
+
+			const sendJson = {
+				periode: periodenValues,
+				nachfrage: nachfrageValues
+			};
+
+			xhrForStandardabweichung.send(JSON.stringify(sendJson));
+		}
+
+		/**
+		 * Berechne Steigungsmass b
+		 */
+		function calcSteigungsmassB() {
+			window.steigungsmassB = window.standardabweichungY / window.standardabweichungX * window.korrelation;
+			steigungsmass.value = Math.round(window.steigungsmassB).toString();
+
+			calcKonstanteAchsenabschnittA();
+		}
+
+		/**
+		 * Berechne Konstante Achsenabschnitt a
+		 */
+		function calcKonstanteAchsenabschnittA() {
+			window.konstanteAchsenabschnittA = -window.steigungsmassB * window.mittelwertPeriode + window.mittelwertNachfrage;
+			konstanteAchsenabschnitt.value = Math.round(window.konstanteAchsenabschnittA).toString();
+
+			calcPrognose();
+		}
+
+		/**
+		 * Berechne Prognos
+		 */
+		function calcPrognose() {
+			const tableRows = table.rows;
+
+			let prognoseGesamt = 0;
+			for (let i = 0; i < tableRows.length; i++) {
+				/**
+				 * @type {HTMLTableRowElement}
+				 */
+				const rowItem = tableRows.item(i);
+				const rowCells = rowItem.cells;
+
+				const periode = parseInt(rowCells[1].textContent);
+				const steigungsmass = window.steigungsmassB;
+				const konstanteAchsenabschnitt = window.konstanteAchsenabschnittA;
+
+				const prognose = Math.round(periode * steigungsmass + konstanteAchsenabschnitt);
+				rowCells[4].textContent = prognose.toString();
+				prognoseGesamt = prognoseGesamt + prognose;
+
+				window.prognoseValues[i] = prognose;
+			}
+
+			let periodeNachfrageGesamt = 0;
+			Object.keys(window.periodeNachfrageValues).forEach(key => {
+				periodeNachfrageGesamt = periodeNachfrageGesamt + window.periodeNachfrageValues[key];
+			});
+
+			const summeRow = table.insertRow();
+			summeRow.insertCell(0);
+			const periode = summeRow.insertCell(1);
+			const nachfrageSumme = summeRow.insertCell(2);
+			const nachfrageSumme2 = summeRow.insertCell(3);
+			const prognoseSumme = summeRow.insertCell(4);
+
+			periode.innerHTML = '<b>Summe</b>';
+			nachfrageSumme.textContent = window.nachfrageGesamt;
+			nachfrageSumme2.textContent = periodeNachfrageGesamt;
+			prognoseSumme.textContent = prognoseGesamt;
+
+			const neuePrognose = window.letztePeriode + 1;
+			const gesuchtePeriode = table.insertRow();
+			gesuchtePeriode.insertCell(0);
+			gesuchtePeriode.insertCell(1).textContent = (neuePrognose).toString();
+			gesuchtePeriode.insertCell(2);
+			gesuchtePeriode.insertCell(3);
+			gesuchtePeriode.insertCell(4).textContent = Math.round(neuePrognose * window.steigungsmassB + window.konstanteAchsenabschnittA).toString();
+
+			generateGraph();
+		}
+
+		/**
+		 * Generate Graph
+		 */
+		function generateGraph() {
+
+			let labels = [];
+			let dataNachfrage = [];
+			let dataPrognosen = [];
+			Object.keys(window.periodenValues).forEach(key => {
+				labels.push(window.periodenValues[key]);
+			});
+			Object.keys(window.nachfrageValues).forEach(key => {
+				dataNachfrage.push(window.nachfrageValues[key]);
+			});
+			Object.keys(window.prognoseValues).forEach(key => {
+				dataPrognosen.push(window.prognoseValues[key]);
+			});
+			const data = {
+				labels: labels,
+				datasets: [
+					{
+						label: 'Nachfrage',
+						backgroundColor: '#00227b',
+						borderColor: '#00227b',
+						data: dataNachfrage,
+					},
+					{
+						label: 'Prognose',
+						backgroundColor: 'rgb(255, 99, 132)',
+						borderColor: 'rgb(255, 99, 132)',
+						data: dataPrognosen,
+					}
+				]
+			};
+			const config = {
+				type: 'line',
+				data,
+				options: {}
+			};
+			var myChart = new Chart(
+					document.getElementById('myChart'),
+					config
+			);
+		}
+
+        /**
+         *  Überprüfe die Eingabefelder und sende bei positiver Validierung das Formular ab
+         */
+        function checkAndSubmitForm() {
+            const periodeValidity = periode.checkValidity();
+            const nachfrageValidity = nachfrage.checkValidity();
+
+            if (periodeValidity && nachfrageValidity) {
+                submitForm();
+            } else {
+				periode.reportValidity();
+				nachfrage.reportValidity();
+            }
+        }
+
+        /**
+         * Sende das Formular ab
+         */
+        function submitForm() {
+            // Konvertiere Input-Eingaben in Float um
+            const periodeValue = parseFloat(periode.value);
+            const nachfrageValue = parseFloat(nachfrage.value);
+
+            // Füge Zeile hinzu
+            const rowNew = table.insertRow();
+            rowNew.id = `row_${tableIndex}`;
+
+            // Zellen erstellen
+            const cellOption = rowNew.insertCell(0);
+            const cellPeriode = rowNew.insertCell(1);
+            const cellNachfrage = rowNew.insertCell(2);
+            const cellNachfragePeriode = rowNew.insertCell(3);
+            const cellPrognose = rowNew.insertCell(4);
+
+            // Werte einfügen
+			const deleteButton = document.createElement('button');
+			deleteButton.innerHTML = '<i class="fas fa-trash-alt"></i>';
+			deleteButton.setAttribute("onclick", "deleteRow('" + rowNew.id + "');");
+			deleteButton.classList.add('btn', 'btn-danger', 'delete-row-button');
+			cellOption.appendChild(deleteButton);
+			cellPeriode.innerText = periodeValue.toString();
+			cellNachfrage.innerText = nachfrageValue.toString();
+			cellNachfragePeriode.innerText = (periodeValue * nachfrageValue).toString();
+			// cellPrognose.innerText = (periodeValue * steigungsmassB + konstanteAchsenabschnittA).toString();
+			nachfrageValues[rowNew.id] = nachfrageValue;
+			periodenValues[rowNew.id] = periodeValue;
+			window.periodeNachfrageValues[rowNew.id] = (periodeValue * nachfrageValue);
+			window.letztePeriode = periodeValue;
+
+            // Erhöhe Zähler
+            tableIndex++;
+            resetForm(true);
+        }
+
+		/**
+		 * Zeile aus Tabelle löschen
+		 */
+		function deleteRow(id) {
+			const searchElement = document.getElementById(id);
+
+			if (searchElement) {
+				searchElement.remove();
+				nachfrageValues[id] = null;
+				periodenValues[id] = null;
+			}
+		}
+
+        /**
+         * Setze das Formular zurück
+         */
+        function resetForm(focus = false) {
+			periode.value = null;
+			nachfrage.value = null;
+
+            if (focus) {
+				periode.focus();
+            }
+        }
+
+        /**
+         * Suche und gebe ein Element nach Id aus
+         *
+         * @param id
+         * @returns {HTMLInputElement}
+         */
+        function getInputElementById(id) {
+            return document.querySelector('#' + id);
+        }
+
+        /**
+         * Suche und gebe ein Button-Element nach Id aus
+         *
+         * @param id
+         * @returns {HTMLButtonElement}
+         */
+        function getButtonElementById(id) {
+            return document.querySelector('#' + id);
+        }
+
+        /**
+         * Suche und gebe ein Tabellen-Element nach Id aus
+         *
+         * @param id
+         * @returns {HTMLTableElement}
+         */
+        function getTableElementById(id) {
+            return document.querySelector('#' + id);
+        }
+
+        // Event-Listener wenn versucht wird das Formular abzusenden
+        document.querySelector('#formular').addEventListener('keydown', function (e) {
+            if(e.key === 'Enter') {
+                e.preventDefault();
+
+                checkAndSubmitForm();
+            }
+        });
+    </script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</body>
+</html>

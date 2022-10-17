@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+	<meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Eckpunkte überprüfen</title>
+
+    <style type="text/css">
+        td, th {
+            padding: 5px;
+        }
+
+        td[data-useable="false"] {
+            background-color: red;
+        }
+    </style>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.3/css/all.css" integrity="sha384-SZXxX4whJ79/gErwcOYf+zWLeJdY/qpuqC4cAa9rOGUstPomtqpuNWT9wdPEn2fk" crossorigin="anonymous">
+</head>
+<body class="mb-5 mt-5">
+	<div class="container">
+		<div class="row">
+			<div class="col-12">
+				<a href="/" class="btn btn-secondary mb-5">Zurück zur Übersicht</a>
+				<h1>Eckpunkte überprüfen</h1>
+			</div>
+			<div class="row mb-3">
+				<div class="col-12 col-md-6">
+					<label for="deckungsbeitragP1" class="form-label">Deckungsbeitrag <b>P1</b></label>
+					<input type="number" class="form-control" id="deckungsbeitragP1" placeholder="Deckungsbeitrag für P1" value="2" />
+				</div>
+				<div class="col-12 col-md-6">
+					<label for="deckungsbeitragP2" class="form-label">Deckungsbeitrag <b>P2</b></label>
+					<input type="number" class="form-control" id="deckungsbeitragP2" placeholder="Deckungsbeitrag für P2" value="3" />
+				</div>
+			</div>
+			<div class="col-12">
+				<div class="table-responsive">
+					<table class="table table-striped table-hover">
+						<thead>
+							<tr>
+								<th>Produkt</th>
+								<th>P1</th>
+								<th>P2</th>
+								<th>Engpass</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td><input type="text" id="v1-name" class="form-control" value="Maschine 1" /></td>
+								<td><input type="text" id="v1-p1" class="form-control" /></td>
+								<td><input type="text" id="v1-p2" class="form-control" /></td>
+								<td><input type="text" id="v1-engpass" class="form-control" /></td>
+							</tr>
+							<tr>
+								<td><input type="text" id="v2-name" class="form-control" value="Maschine 2" /></td>
+								<td><input type="text" id="v2-p1" class="form-control" /></td>
+								<td><input type="text" id="v2-p2" class="form-control" /></td>
+								<td><input type="text" id="v2-engpass" class="form-control" /></td>
+							</tr>
+							<tr>
+								<td><input type="text" id="v3-name" class="form-control" value="Maschine 3" /></td>
+								<td><input type="text" id="v3-p1" class="form-control" /></td>
+								<td><input type="text" id="v3-p2" class="form-control"  /></td>
+								<td><input type="text" id="v3-engpass" class="form-control" /></td>
+							</tr>
+						</tbody>
+					</table>
+					<button id="berechnen" class="btn btn-primary">Errechnen</button>
+				</div>
+			</div>
+			<div class="col-12">
+				<hr class="mt-5 mb-5" />
+				<div class="row mb-3">
+					<div class="col-12 col-md-6">
+						<div class="row">
+							<div class="col-12 col-md-6">
+								<label for="linie1XAchse" class="form-label" id="linie1XAchseLabel">linie1XAchse</label>
+								<input type="text" class="form-control disabled" id="linie1XAchse" placeholder="linie1XAchse" disabled />
+							</div>
+							<div class="col-12 col-md-6">
+								<label for="linie1XAchseDB" class="form-label" id="linie1XAchseDBLabel">linie1XAchseDB</label>
+								<input type="text" class="form-control disabled" id="linie1XAchseDB" placeholder="linie1XAchseDB" disabled />
+							</div>
+						</div>
+					</div>
+					<div class="col-12 col-md-6">
+						<div class="row">
+							<div class="col-12 col-md-6">
+								<label for="linie1YAchse" class="form-label" id="linie1YAchseLabel">linie1YAchse</label>
+								<input type="text" class="form-control disabled" id="linie1YAchse" placeholder="linie1YAchse" disabled />
+							</div>
+							<div class="col-12 col-md-6">
+								<label for="linie1YAchseDB" class="form-label" id="linie1YAchseDBLabel">linie1YAchseDB</label>
+								<input type="text" class="form-control disabled" id="linie1YAchseDB" placeholder="linie1YAchseDB" disabled />
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="row mb-3">
+					<div class="col-12 col-md-6">
+						<div class="row">
+							<div class="col-12 col-md-6">
+								<label for="linie2XAchse" class="form-label" id="linie2XAchseLabel">linie2XAchse</label>
+								<input type="text" class="form-control disabled" id="linie2XAchse" placeholder="linie2XAchse" disabled />
+							</div>
+							<div class="col-12 col-md-6">
+								<label for="linie2XAchseDB" class="form-label" id="linie2XAchseDBLabel">linie2XAchseDB</label>
+								<input type="text" class="form-control disabled" id="linie2XAchseDB" placeholder="linie2XAchseDB" disabled />
+							</div>
+						</div>
+					</div>
+					<div class="col-12 col-md-6">
+						<div class="row">
+							<div class="col-12 col-md-6">
+								<label for="linie2YAchse" class="form-label" id="linie2YAchseLabel">linie2YAchse</label>
+								<input type="text" class="form-control disabled" id="linie2YAchse" placeholder="linie2YAchse" disabled />
+							</div>
+							<div class="col-12 col-md-6">
+								<label for="linie2YAchseDB" class="form-label" id="linie2YAchseDBLabel">linie2YAchseDB</label>
+								<input type="text" class="form-control disabled" id="linie2YAchseDB" placeholder="linie2YAchseDB" disabled />
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="row mb-3">
+					<div class="col-12 col-md-6">
+						<div class="row">
+							<div class="col-12 col-md-6">
+								<label for="linie3XAchse" class="form-label" id="linie3XAchseLabel">linie3XAchse</label>
+								<input type="text" class="form-control disabled" id="linie3XAchse" placeholder="linie3XAchse" disabled />
+							</div>
+							<div class="col-12 col-md-6">
+								<label for="linie3XAchseDB" class="form-label" id="linie3XAchseDBLabel">linie3XAchseDB</label>
+								<input type="text" class="form-control disabled" id="linie3XAchseDB" placeholder="linie3XAchseDB" disabled />
+							</div>
+						</div>
+					</div>
+					<div class="col-12 col-md-6">
+						<div class="row">
+							<div class="col-12 col-md-6">
+								<label for="linie3YAchse" class="form-label" id="linie3YAchseLabel">linie3YAchse</label>
+								<input type="text" class="form-control disabled" id="linie3YAchse" placeholder="linie3YAchse" disabled />
+							</div>
+							<div class="col-12 col-md-6">
+								<label for="linie3YAchseDB" class="form-label" id="linie3YAchseDBLabel">linie3YAchseDB</label>
+								<input type="text" class="form-control disabled" id="linie3YAchseDB" placeholder="linie3YAchseDB" disabled />
+							</div>
+						</div>
+					</div>
+				</div>
+				<hr class="mb-3" />
+
+				<div class="row mb-3">
+					<div class="col-12 col-md-6">
+						<label for="linie1MitLinie2" class="form-label" id="linie1MitLinie2Label">linie1MitLinie2</label>
+						<input type="text" class="form-control disabled" id="linie1MitLinie2" placeholder="linie1MitLinie2" disabled />
+					</div>
+					<div class="col-12 col-md-6">
+						<label for="linie1MitLinie2DB" class="form-label" id="linie1MitLinie2DBLabel">linie1MitLinie2DB</label>
+						<input type="text" class="form-control disabled" id="linie1MitLinie2DB" placeholder="linie1MitLinie2DB" disabled />
+					</div>
+				</div>
+				<div class="row mb-3">
+					<div class="col-12 col-md-6">
+						<label for="linie1MitLinie3" class="form-label" id="linie1MitLinie3Label">linie1MitLinie3</label>
+						<input type="text" class="form-control disabled" id="linie1MitLinie3" placeholder="linie1MitLinie3" disabled />
+					</div>
+					<div class="col-12 col-md-6">
+						<label for="linie1MitLinie3DB" class="form-label" id="linie1MitLinie3DBLabel">linie1MitLinie3DB</label>
+						<input type="text" class="form-control disabled" id="linie1MitLinie3DB" placeholder="linie1MitLinie3DB" disabled />
+					</div>
+				</div>
+				<div class="row mb-3">
+					<div class="col-12 col-md-6">
+						<label for="linie2MitLinie3" class="form-label" id="linie2MitLinie3Label">linie2MitLinie3</label>
+						<input type="text" class="form-control disabled" id="linie2MitLinie3" placeholder="linie2MitLinie3" disabled />
+					</div>
+					<div class="col-12 col-md-6">
+						<label for="linie2MitLinie3DB" class="form-label" id="linie2MitLinie3DBLabel">linie2MitLinie3DB</label>
+						<input type="text" class="form-control disabled" id="linie2MitLinie3DB" placeholder="linie2MitLinie3DB" disabled />
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="container mb-5">
+		<div class="row mb-5">
+			<div class="col-12">
+				<div>
+					<canvas id="myChart"></canvas>
+				</div>
+			</div>
+		</div>
+	</div>
+
+    <script type="text/javascript">
+		const berechnenButton = getButtonElementById('berechnen');
+
+		window.v1Name = null;
+		window.v2Name = null;
+		window.v3Name = null;
+		window.P1V1Coordination = null;
+		window.P2V1Coordination = null;
+		window.P1V2Coordination = null;
+		window.P2V2Coordination = null;
+		window.P1V3Coordination = null;
+		window.P2V3Coordination = null;
+
+		window.highestX = 0;
+		window.highestY = 0;
+
+		const linie1XAchseInput = getInputElementById('linie1XAchse');
+		const linie1YAchseInput = getInputElementById('linie1YAchse');
+		const linie2XAchseInput = getInputElementById('linie2XAchse');
+		const linie2YAchseInput = getInputElementById('linie2YAchse');
+		const linie3XAchseInput = getInputElementById('linie3XAchse');
+		const linie3YAchseInput = getInputElementById('linie3YAchse');
+
+		const linie1MitLinie2Input = getInputElementById('linie1MitLinie2');
+		const linie1MitLinie3Input = getInputElementById('linie1MitLinie3');
+		const linie2MitLinie3Input = getInputElementById('linie2MitLinie3');
+
+		berechnenButton.addEventListener('click', function () {
+			const v1Name = getInputElementById('v1-name').value;
+			const v2Name = getInputElementById('v2-name').value;
+			const v3Name = getInputElementById('v3-name').value;
+
+			const v1P1 = parseFloat(eval(getInputElementById('v1-p1').value));
+			const v2P1 = parseFloat(eval(getInputElementById('v2-p1').value));
+			const v3P1 = parseFloat(eval(getInputElementById('v3-p1').value));
+
+			const v1P2 = parseFloat(eval(getInputElementById('v1-p2').value));
+			const v2P2 = parseFloat(eval(getInputElementById('v2-p2').value));
+			const v3P2 = parseFloat(eval(getInputElementById('v3-p2').value));
+
+			const v1Engpass = parseFloat(eval(getInputElementById('v1-engpass').value));
+			const v2Engpass = parseFloat(eval(getInputElementById('v2-engpass').value));
+			const v3Engpass = parseFloat(eval(getInputElementById('v3-engpass').value));
+
+			window.v1Name = v1Name;
+			window.v2Name = v2Name;
+			window.v3Name = v3Name;
+
+			let highestX = Math.round(v1Engpass / v1P1);
+			let tempX = null;
+			let highestY = Math.round(v1Engpass / v1P2);
+			let tempY = null;
+			window.P1V1Coordination = [highestX, 0];
+			window.P2V1Coordination = [0, highestY];
+
+			tempX = Math.round(v2Engpass / v2P1);
+			tempY = Math.round(v2Engpass / v2P2);
+			window.P1V2Coordination = [tempX, 0];
+			window.P2V2Coordination = [0, tempY];
+
+			if (tempX > highestX) {
+				highestX = tempX;
+			}
+			if (tempY > highestY) {
+				highestY = tempY;
+			}
+
+			tempX = Math.round(v3Engpass / v3P1);
+			tempY = Math.round(v3Engpass / v3P2);
+			window.P1V3Coordination = [tempX, 0];
+			window.P2V3Coordination = [0, tempY];
+
+			if (tempX > highestX) {
+				highestX = tempX;
+			}
+			if (tempY > highestY) {
+				highestY = tempY;
+			}
+
+			linie1XAchseInput.value = JSON.stringify(window.P1V1Coordination);
+			linie1YAchseInput.value = JSON.stringify(window.P2V1Coordination);
+			linie2XAchseInput.value = JSON.stringify(window.P1V2Coordination);
+			linie2YAchseInput.value = JSON.stringify(window.P2V2Coordination);
+			linie3XAchseInput.value = JSON.stringify(window.P1V3Coordination);
+			linie3YAchseInput.value = JSON.stringify(window.P2V3Coordination);
+			window.highestX = parseInt(highestX + 10);
+			window.highestY = parseInt(highestY + 10);
+
+			setLabelNames();
+
+			calcSchnittpunkteDerLinien();
+		});
+
+		/**
+		 * Setze nur die Labels
+		 */
+		function setLabelNames() {
+			getLabelElementById('linie1XAchseLabel').innerHTML = window.v1Name + ' Schnittstelle <b>X-Achse</b>';
+			getLabelElementById('linie1XAchseDBLabel').innerHTML = window.v1Name + ' <b>S X-Achse</b> Deckungsbeitrag';
+
+			getLabelElementById('linie1YAchseLabel').innerHTML = window.v1Name + ' Schnittstelle <b>Y-Achse</b>';
+			getLabelElementById('linie1YAchseDBLabel').innerHTML = window.v1Name + ' <b>S Y-Achse</b> Deckungsbeitrag';
+
+			getLabelElementById('linie2XAchseLabel').innerHTML = window.v2Name + ' Schnittstelle <b>X-Achse</b>';
+			getLabelElementById('linie2XAchseDBLabel').innerHTML = window.v2Name + ' <b>S X-Achse</b> Deckungsbeitrag';
+
+			getLabelElementById('linie2YAchseLabel').innerHTML = window.v2Name + ' Schnittstelle <b>Y-Achse</b>';
+			getLabelElementById('linie2YAchseDBLabel').innerHTML = window.v2Name + ' <b>S Y-Achse</b> Deckungsbeitrag';
+
+			getLabelElementById('linie3XAchseLabel').innerHTML = window.v3Name + ' Schnittstelle <b>X-Achse</b>';
+			getLabelElementById('linie3XAchseDBLabel').innerHTML = window.v3Name + ' <b>S X-Achse</b> Deckungsbeitrag';
+
+			getLabelElementById('linie3YAchseLabel').innerHTML = window.v3Name + ' Schnittstelle <b>Y-Achse</b>';
+			getLabelElementById('linie3YAchseDBLabel').innerHTML = window.v3Name + ' <b>S Y-Achse</b> Deckungsbeitrag';
+
+			getLabelElementById('linie1MitLinie2Label').innerHTML = '<i>' + window.v1Name + '</i> Schnittstelle mit <i>' + window.v2Name + '</i>';
+			getLabelElementById('linie1MitLinie3Label').innerHTML = '<i>' + window.v1Name + '</i> Schnittstelle mit <i>' + window.v3Name + '</i>';
+			getLabelElementById('linie2MitLinie3Label').innerHTML = '<i>' + window.v2Name + '</i> Schnittstelle mit <i>' + window.v3Name + '</i>';
+
+			getLabelElementById('linie1MitLinie2DBLabel').innerHTML = '<i>' + window.v1Name + '</i> S <i>' + window.v2Name + '</i> <b>Deckungsbeitrag</b>';
+			getLabelElementById('linie1MitLinie3DBLabel').innerHTML = '<i>' + window.v1Name + '</i> S <i>' + window.v3Name + '</i> <b>Deckungsbeitrag</b>';
+			getLabelElementById('linie2MitLinie3DBLabel').innerHTML = '<i>' + window.v2Name + '</i> S <i>' + window.v3Name + '</i> <b>Deckungsbeitrag</b>';
+		}
+
+		/**
+		 * Berechne die Schnittstellen der einzelnen Linien
+		 */
+		function calcSchnittpunkteDerLinien() {
+			window.linie1MitLinie2 = math.intersect(window.P1V1Coordination, window.P2V1Coordination, window.P1V2Coordination, window.P2V2Coordination);
+			window.linie1MitLinie3 = math.intersect(window.P1V1Coordination, window.P2V1Coordination, window.P1V3Coordination, window.P2V3Coordination);
+			window.linie2MitLinie3 = math.intersect(window.P1V2Coordination, window.P2V2Coordination, window.P1V3Coordination, window.P2V3Coordination);
+
+			linie1MitLinie2Input.value = JSON.stringify(window.linie1MitLinie2);
+			linie1MitLinie3Input.value = JSON.stringify(window.linie1MitLinie3);
+			linie2MitLinie3Input.value = JSON.stringify(window.linie2MitLinie3);
+
+			calcDeckungsbeitrag();
+		}
+
+		/**
+		 * Berechne den Deckungsbeitrag für jeden Schnittpunkt
+		 */
+		function calcDeckungsbeitrag() {
+			const deckungsbeitragP1Input = parseFloat(getInputElementById('deckungsbeitragP1').value);
+			const deckungsbeitragP2Input = parseFloat(getInputElementById('deckungsbeitragP2').value);
+
+			const linie1XAchseDBInput = getInputElementById('linie1XAchseDB');
+			const linie1YAchseDBInput = getInputElementById('linie1YAchseDB');
+			const linie2XAchseDBInput = getInputElementById('linie2XAchseDB');
+			const linie2YAchseDBInput = getInputElementById('linie2YAchseDB');
+			const linie3XAchseDBInput = getInputElementById('linie3XAchseDB');
+			const linie3YAchseDBInput = getInputElementById('linie3YAchseDB');
+
+			const linie1MitLinie2DBInput = getInputElementById('linie1MitLinie2DB');
+			const linie1MitLinie3DBInput = getInputElementById('linie1MitLinie3DB');
+			const linie2MitLinie3DBInput = getInputElementById('linie2MitLinie3DB');
+
+			const linie1XCoords = JSON.parse(linie1XAchseInput.value);
+			linie1XAchseDBInput.value = (deckungsbeitragP1Input * linie1XCoords[0] + deckungsbeitragP2Input * linie1XCoords[1]).toString();
+
+			const linie1YCoords = JSON.parse(linie1YAchseInput.value);
+			linie1YAchseDBInput.value = (deckungsbeitragP1Input * linie1YCoords[0] + deckungsbeitragP2Input * linie1YCoords[1]).toString();
+
+			const linie2XCoords = JSON.parse(linie2XAchseInput.value);
+			linie2XAchseDBInput.value = (deckungsbeitragP1Input * linie2XCoords[0] + deckungsbeitragP2Input * linie2XCoords[1]).toString();
+
+			const linie2YCoords = JSON.parse(linie2YAchseInput.value);
+			linie2YAchseDBInput.value = (deckungsbeitragP1Input * linie2YCoords[0] + deckungsbeitragP2Input * linie2YCoords[1]).toString();
+
+			const linie3XCoords = JSON.parse(linie3XAchseInput.value);
+			linie3XAchseDBInput.value = (deckungsbeitragP1Input * linie3XCoords[0] + deckungsbeitragP2Input * linie3XCoords[1]).toString();
+
+			const linie3YCoords = JSON.parse(linie3YAchseInput.value);
+			linie3YAchseDBInput.value = (deckungsbeitragP1Input * linie3YCoords[0] + deckungsbeitragP2Input * linie3YCoords[1]).toString();
+
+			const linie1MitLinie2Coords = JSON.parse(linie1MitLinie2Input.value);
+			linie1MitLinie2DBInput.value = (deckungsbeitragP1Input * linie1MitLinie2Coords[0] + deckungsbeitragP2Input * linie1MitLinie2Coords[1]).toString();
+
+			const linie1MitLinie3Coords = JSON.parse(linie1MitLinie3Input.value);
+			linie1MitLinie3DBInput.value = (deckungsbeitragP1Input * linie1MitLinie3Coords[0] + deckungsbeitragP2Input * linie1MitLinie3Coords[1]).toString();
+
+			const linie2MitLinie3Coords = JSON.parse(linie2MitLinie3Input.value);
+			linie2MitLinie3DBInput.value = (deckungsbeitragP1Input * linie2MitLinie3Coords[0] + deckungsbeitragP2Input * linie2MitLinie3Coords[1]).toString();
+
+			createGraph();
+		}
+
+		function createGraph() {
+			console.log()
+			const linie1MitLinie2Coords = JSON.parse(linie1MitLinie2Input.value);
+			const linie1MitLinie3Coords = JSON.parse(linie1MitLinie3Input.value);
+			const linie2MitLinie3Coords = JSON.parse(linie2MitLinie3Input.value);
+
+			const data = {
+				datasets: [
+					{
+						label: window.v1Name,
+						backgroundColor: '#00227b',
+						borderColor: '#00227b',
+						data: [
+							{
+								x: 0,
+								y: window.P2V1Coordination[1]
+							},{
+								x: window.P1V1Coordination[0],
+								y: 0
+							}
+						]
+					},
+					{
+						label: window.v2Name,
+						backgroundColor: 'rgb(255, 99, 132)',
+						borderColor: 'rgb(255, 99, 132)',
+						data: [
+							{
+								x: 0,
+								y: window.P2V2Coordination[1]
+							},{
+								x: window.P1V2Coordination[0],
+								y: 0
+							}
+						]
+					},
+					{
+						label: window.v3Name,
+						backgroundColor: '#9c27b0',
+						borderColor: '#6a0080',
+						data: [
+							{
+								x: 0,
+								y: window.P2V3Coordination[1]
+							},{
+								x: window.P1V3Coordination[0],
+								y: 0
+							}
+						]
+					},
+					{
+						label: 'Berechnete Eckpunkte (Schnittpunkte)',
+						backgroundColor: '#d50000',
+						borderColor: '#9b0000',
+						showLine: 1,
+						data: [
+							{
+								x: linie1MitLinie2Coords[0],
+								y: linie1MitLinie2Coords[1]
+							},{
+								x: linie1MitLinie3Coords[0],
+								y: linie1MitLinie3Coords[1]
+							},{
+								x: linie2MitLinie3Coords[0],
+								y: linie2MitLinie3Coords[1]
+							}
+						]
+					}
+				]
+			};
+			const config = {
+				type: 'scatter',
+				data: data,
+				options: {
+					responsive: true,
+					showLine: true
+				}
+			};
+			var myChart = new Chart(
+					document.getElementById('myChart'),
+					config
+			);
+		}
+
+		/**
+		 * Suche und gebe ein Element nach Id aus
+		 *
+		 * @param id
+		 * @returns {HTMLInputElement}
+		 */
+		function getInputElementById(id) {
+			return document.querySelector('#' + id);
+		}
+
+		/**
+		 * Suche und gebe ein Button-Element nach Id aus
+		 *
+		 * @param id
+		 * @returns {HTMLButtonElement}
+		 */
+		function getButtonElementById(id) {
+			return document.querySelector('#' + id);
+		}
+
+		/**
+		 * Suche und gebe ein Tabellen-Element nach Id aus
+		 *
+		 * @param id
+		 * @returns {HTMLTableElement}
+		 */
+		function getTableElementById(id) {
+			return document.querySelector('#' + id);
+		}
+
+		/**
+		 * Suche und gebe ein Label-Element nach Id aus
+		 *
+		 * @param id
+		 * @returns {HTMLLabelElement}
+		 */
+		function getLabelElementById(id) {
+			return document.querySelector('#' + id);
+		}
+    </script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/9.4.3/math.min.js" integrity="sha512-h6sl9arHHMneDTSQwIiJ6NUSx3/wGWKr9P25MQCnwmTsPMBHIscEtk/5k/zA+IOjvGQUuvn2003cRhX2BUpgqw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</body>
+</html>

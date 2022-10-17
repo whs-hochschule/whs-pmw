@@ -1,0 +1,31 @@
+version: '3.5'
+
+services:
+  php:
+    build: ./Docker/php-fpm
+    working_dir: /data
+    volumes:
+      - "${ROOT_PATH}/Data:/data"
+    networks:
+      - "whsPmw"
+
+  nginx:
+    build: ./Docker/nginx
+    links:
+      - "php"
+    environment:
+      NGINX_PORT: "${NGINX_PORT}"
+      VIRTUAL_HOST: "${VIRTUAL_HOST}"
+    command: /bin/sh -c "/run_nginx.sh"
+    volumes:
+      - "${ROOT_PATH}/Data:/data"
+    networks:
+      - "whsPmw"
+      - "nginx-proxy"
+
+networks:
+  nginx-proxy:
+    external:
+      name: "nginx-proxy"
+  whsPmw:
+    driver: bridge

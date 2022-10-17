@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+	<meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Optimale Produktionsprogrammplanung</title>
+
+    <style type="text/css">
+        td, th {
+            padding: 5px;
+        }
+
+        td[data-useable="false"] {
+            background-color: red;
+        }
+    </style>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.3/css/all.css" integrity="sha384-SZXxX4whJ79/gErwcOYf+zWLeJdY/qpuqC4cAa9rOGUstPomtqpuNWT9wdPEn2fk" crossorigin="anonymous">
+</head>
+<body class="mb-5 mt-5">
+	<div class="container">
+		<div class="row">
+			<div class="col-12">
+				<a href="/" class="btn btn-secondary mb-5">Zurück zur Übersicht</a>
+				<h1>Optimale Produktionsprogrammplanung</h1>
+				<p>Füge erst die einzelnen Produkte hinzu und klicke, wenn du fertig bist auf "Tabelle errechnen", um die Tabelle auszuwerten.</p>
+				<hr />
+			</div>
+			<div class="col-12 col-md-6 col-lg-4">
+				<div class="mb-3">
+				  <label for="verfuegbareZeit" class="form-label">Verfügbare Zeit in min.</label>
+				  <input type="number" class="form-control" id="verfuegbareZeit" placeholder="Verfügbare Zeit in min." required />
+				</div>
+			</div>
+			<div class="col-12">
+				<hr />
+				<form id="formular" class="mb-3">
+					<div class="row">
+						<div class="col-12 col-md-6 col-lg-4">
+							<label for="mengenMax" class="form-label">Mengen max.</label>
+							<input type="number" class="form-control" id="mengenMax" placeholder="Mengen max." required />
+						</div>
+						<div class="col-12 col-md-6 col-lg-4">
+							<label for="preiseInEuroProME" class="form-label">Preise in €/ME</label>
+							<input type="number" class="form-control" id="preiseInEuroProME" placeholder="Preise in €/ME" required />
+						</div>
+						<div class="col-12 col-md-6 col-lg-4">
+							<label for="variableStueckkostenInEuroProME" class="form-label">Variable Stückkosten in €/ME</label>
+							<input type="number" class="form-control" id="variableStueckkostenInEuroProME" placeholder="Variable Stückkosten in €/ME" required />
+						</div>
+						<div class="col-12 col-md-6 col-lg-4">
+							<label for="produktionskoeffizientInMinEuroProME" class="form-label">Produktionskoeffizient in min/ME</label>
+							<input type="number" class="form-control" id="produktionskoeffizientInMinEuroProME" placeholder="Produktionskoeffizient in min/ME" required />
+						</div>
+						<div class="col-12 mt-3">
+							<button type="submit" id="eintragen" class="btn btn-primary">Eintragen</button>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-12">
+				<hr />
+				<button type="button" id="rangfolgeRechnen" class="btn btn-secondary">Tabelle errechnen</button>
+			</div>
+			<div class="col-12">
+				<div class="table-responsive">
+					<table class="table table-striped table-hover">
+						<thead>
+							<tr>
+								<th>Option</th>
+								<th>Produkte</th>
+								<th>Mengen max.</th>
+								<th>Preise in €/ME</th>
+								<th>Variable Stückkosten in €/ME</th>
+								<th>Produktionskoeffizient in min/ME</th>
+								<th>Deckungsbeitrag in €/ME</th>
+								<th>relativer DB in €/ME</th>
+								<th>Rangfolge</th>
+								<th>Prod-mengen</th>
+								<th>Benötigte Kapazitäten in min</th>
+								<th>DB in €</th>
+							</tr>
+						</thead>
+						<tbody id="table">
+						</tbody>
+					</table>		
+				</div>
+			</div>
+		</div>
+	</div>
+
+    <script type="text/javascript">
+        const eintragenButton = getButtonElementById('eintragen');
+        const rangfolgeRechnenButton = getButtonElementById('rangfolgeRechnen');
+        const table = getTableElementById('table');
+        const verfuegbareZeit = getInputElementById('verfuegbareZeit');
+        const mengenMax = getInputElementById('mengenMax');
+        const preiseInEuroProME = getInputElementById('preiseInEuroProME');
+        const variableStueckkostenInEuroProME = getInputElementById('variableStueckkostenInEuroProME');
+        const produktionskoeffizientInMinEuroProME = getInputElementById('produktionskoeffizientInMinEuroProME');
+
+        let verfuegbareZeitValue = parseFloat(verfuegbareZeit.value);
+        window.sortedRows = [];
+        window.verwendeteZeit = 0;
+
+        let tableIndex = 0;
+        let alphabetZahler = 65;
+
+        eintragenButton.addEventListener('click', function (e) {
+            e.preventDefault();
+            checkAndSubmitForm();
+        });
+
+        rangfolgeRechnenButton.addEventListener('click', function (e) {
+            e.preventDefault();
+
+            const verfuegbareZeitValidity = verfuegbareZeit.checkValidity();
+
+            if (verfuegbareZeitValidity) {
+                calculateReihenfolge();
+                calculateProdMengen(1);
+                endErgebnis();
+            } else {
+                verfuegbareZeit.reportValidity();
+            }
+        });
+
+        /**
+         *  Überprüfe die Eingabefelder und sende bei positiver Validierung das Formular ab
+         */
+        function checkAndSubmitForm() {
+            const verfuegbareZeitValidity = verfuegbareZeit.checkValidity();
+            const mengenMaxValidity = mengenMax.checkValidity();
+            const preiseInEuroProMEValidity = preiseInEuroProME.checkValidity();
+            const variableStueckkostenInEuroProMEValidity = variableStueckkostenInEuroProME.checkValidity();
+            const produktionskoeffizientInMinEuroProMEValidity = produktionskoeffizientInMinEuroProME.checkValidity();
+
+            if (verfuegbareZeitValidity && mengenMaxValidity && preiseInEuroProMEValidity && variableStueckkostenInEuroProMEValidity && produktionskoeffizientInMinEuroProMEValidity) {
+                submitForm();
+            } else {
+                verfuegbareZeit.reportValidity();
+                mengenMax.reportValidity();
+                preiseInEuroProME.reportValidity();
+                variableStueckkostenInEuroProME.reportValidity();
+                produktionskoeffizientInMinEuroProME.reportValidity();
+            }
+        }
+
+        /**
+         * Sende das Formular ab
+         */
+        function submitForm() {
+            // Konvertiere Input-Eingaben in Float um
+            const mengenMaxValue = parseFloat(mengenMax.value);
+            const preiseInEuroProMEValue = parseFloat(preiseInEuroProME.value);
+            const variableStueckkostenInEuroProMEValue = parseFloat(variableStueckkostenInEuroProME.value);
+            const produktionskoeffizientInMinEuroProMEValue = parseFloat(produktionskoeffizientInMinEuroProME.value);
+            const absoluterDB = preiseInEuroProMEValue - variableStueckkostenInEuroProMEValue;
+            const relativerDB = absoluterDB / produktionskoeffizientInMinEuroProMEValue;
+            const alphabetBuchstabe = String.fromCharCode(alphabetZahler);
+
+            // Füge Zeile hinzu
+            const rowNew = table.insertRow();
+            rowNew.id = `row_${alphabetBuchstabe}_${tableIndex}`;
+
+            // Zellen erstellen
+            const cellOption = rowNew.insertCell(0);
+            const cellAlphabet = rowNew.insertCell(1);
+            const cellMengenMax = rowNew.insertCell(2);
+            const cellPreiseInEuroProME = rowNew.insertCell(3);
+            const cellVariableStueckkostenInEuroProME= rowNew.insertCell(4);
+            const cellProduktionskoeffizientInMinEuroProME = rowNew.insertCell(5);
+            const cellAbsoluteDB = rowNew.insertCell(6);
+            const cellRelativerDB = rowNew.insertCell(7);
+
+            // Werte einfügen
+			const deleteButton = document.createElement('button');
+			deleteButton.innerHTML = '<i class="fas fa-trash-alt"></i>';
+			deleteButton.setAttribute("onclick", "deleteRow('" + rowNew.id + "');");
+			deleteButton.classList.add('btn', 'btn-danger');
+			cellOption.appendChild(deleteButton);
+            //cellOption.innerHTML = `<button onclick="deleteRow('${rowNew.id}');">Löschen</button>`;
+            cellAlphabet.innerText = alphabetBuchstabe;
+            cellMengenMax.innerText = mengenMaxValue.toString();
+            cellPreiseInEuroProME.innerText = preiseInEuroProMEValue.toString();
+            cellVariableStueckkostenInEuroProME.innerText = variableStueckkostenInEuroProMEValue.toString();
+            cellProduktionskoeffizientInMinEuroProME.innerText = produktionskoeffizientInMinEuroProMEValue.toString();
+            cellAbsoluteDB.innerText = absoluterDB.toString();
+            cellRelativerDB.innerText = relativerDB < 0 ? `-- (${relativerDB})` : relativerDB.toString();
+            cellRelativerDB.dataset.useable = (relativerDB >= 0).toString();
+
+            // Erhöhe Zähler
+            tableIndex++;
+            alphabetZahler++;
+
+            resetForm(true);
+        }
+
+        /**
+         * Rufe Zeilen ab, wo die Reihenfolge errechnet werden muss
+         */
+        function calculateReihenfolge() {
+            const tableRows = table.rows;
+            let useableValues = [];
+
+            for (let i = 0; i < tableRows.length; i++) {
+                /**
+                 * @type {HTMLTableRowElement}
+                 */
+                const rowItem = tableRows.item(i);
+                rowItem.insertCell(8);
+                const rowCells = rowItem.cells;
+
+                if (rowCells[7].dataset.useable === "true") {
+                    useableValues.push({
+                        row: rowItem,
+                        value: parseFloat(rowCells[7].textContent)
+                    });
+                } else {
+                    rowItem.cells[8].textContent = "negativer DB";
+                    rowItem.cells[8].dataset.useable ="false";
+                }
+            }
+
+            if (useableValues) {
+                getReihenfolge(useableValues, 1);
+            }
+        }
+
+        /**
+         * Errechne Rekursiv die Reihenfolge der Produkte
+         */
+        function getReihenfolge(array, position) {
+            let maxValue = null,
+                highestRow = null,
+                highestItemIndex = 0,
+                stayedOver = [];
+
+            for (let i = 0; i < array.length; i++) {
+                // Aktueller Wert
+                const currentValue = parseFloat(array[i].value);
+
+                // Überprüfe, ob aktueller Wert größer als vorheriger Wert ist
+                if (currentValue > maxValue) {
+                    // Wenn ja, verwende aktuellen Wert, füge alten Eintrag zum weiteren Zählen hinzu
+                    if (i > 0) {
+                        stayedOver.push({
+                            row: highestRow,
+                            value: maxValue
+                        });
+                    }
+
+                    maxValue = currentValue;
+                    highestRow = array[i].row;
+                    highestItemIndex = i;
+                } else {
+                    // Wenn nein, füge Eintrag zum weiteren Zählen hinzu
+                    stayedOver.push(array[i]);
+                }
+            }
+
+            // Schreibe Position
+            highestRow.cells[8].textContent = position;
+
+            // Erstelle passenden Eintrag mit aktueller Position
+            window.sortedRows['position' + position] = {
+                row: highestRow,
+                value: maxValue,
+                position: position
+            };
+
+            // Überprüfe, ob nach zu sortierende Werte vorhanden sind
+            if (stayedOver.length) {
+                // Wenn ja, rechne rekursiv weiter
+                getReihenfolge(stayedOver, position + 1);
+            }
+        }
+
+        /**
+         * Berechne Prod-Menge und Benötigte Kapazitäten, rekursiv
+         */
+        function calculateProdMengen(positionNumber) {
+            verfuegbareZeitValue = parseFloat(verfuegbareZeit.value);
+            if (window.sortedRows.hasOwnProperty('position' + positionNumber)) {
+                /** @type {HTMLTableRowElement} */
+                const hoechsteProdMengeRow = window.sortedRows['position' + positionNumber].row;
+                const cell2 = parseFloat(hoechsteProdMengeRow.cells[2].textContent);
+                const cell5 = parseFloat(hoechsteProdMengeRow.cells[5].textContent);
+                const cell6 = parseFloat(hoechsteProdMengeRow.cells[6].textContent);
+                const restZeit = verfuegbareZeitValue - window.verwendeteZeit;
+
+                // Berechne die Anzahl an Produkten, die Hergestellt werden können, VerfügbareZeit / ZeitProStück
+                let anzahlAnProduktenZumHerstellen = restZeit / cell5;
+                let benoetigteZeit = restZeit;
+
+                // Wenn benötigte Zeit höher ist als max. Menge berechne Menge * ZeitProStück
+                if (anzahlAnProduktenZumHerstellen > cell2) {
+
+                    benoetigteZeit = cell2 * cell5;
+                    anzahlAnProduktenZumHerstellen = cell2;
+                }
+
+                hoechsteProdMengeRow.insertCell(9)
+                hoechsteProdMengeRow.insertCell(10)
+                hoechsteProdMengeRow.insertCell(11)
+                hoechsteProdMengeRow.cells[9].textContent = anzahlAnProduktenZumHerstellen.toString();
+                hoechsteProdMengeRow.cells[10].textContent = benoetigteZeit;
+                hoechsteProdMengeRow.cells[11].textContent = (anzahlAnProduktenZumHerstellen * cell6).toString();
+
+                window.verwendeteZeit = window.verwendeteZeit + benoetigteZeit;
+
+                if ((verfuegbareZeitValue - window.verwendeteZeit) > 0) {
+                    calculateProdMengen(positionNumber + 1);
+                }
+            }
+        }
+
+        /**
+         * Berechne das Endergebnis
+         */
+        function endErgebnis() {
+            const rows = table.rows;
+            let kapazitaeten = 0,
+                gesamtDB = 0;
+
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows.item(i);
+
+                if (row.cells.hasOwnProperty(10) && row.cells.hasOwnProperty(11)) {
+                    kapazitaeten = kapazitaeten + parseFloat(row.cells[10].textContent);
+                    gesamtDB = gesamtDB + parseFloat(row.cells[11].textContent);
+                }
+            }
+
+            const resultRow = table.insertRow();
+            resultRow.insertCell(0)
+            resultRow.insertCell(1)
+            resultRow.insertCell(2)
+            resultRow.insertCell(3)
+            resultRow.insertCell(4)
+            resultRow.insertCell(5)
+            resultRow.insertCell(6)
+            resultRow.insertCell(7)
+            resultRow.insertCell(8)
+            resultRow.insertCell(9)
+            const resultCell10 = resultRow.insertCell(10)
+            const resultCell11 = resultRow.insertCell(11)
+
+            resultCell10.textContent = kapazitaeten;
+            resultCell11.textContent = gesamtDB;
+        }
+
+        /**
+         * Zeile aus Tabelle löschen
+         */
+        function deleteRow(id) {
+            const searchElement = document.getElementById(id);
+
+            if (searchElement) {
+                searchElement.remove();
+            }
+        }
+
+        /**
+         * Setze das Formular zurück
+         */
+        function resetForm(focus = false) {
+            mengenMax.value = null;
+            preiseInEuroProME.value = null;
+            variableStueckkostenInEuroProME.value = null;
+            produktionskoeffizientInMinEuroProME.value = null;
+
+            if (focus) {
+                mengenMax.focus();
+            }
+        }
+
+        /**
+         * Suche und gebe ein Element nach Id aus
+         *
+         * @param id
+         * @returns {HTMLInputElement}
+         */
+        function getInputElementById(id) {
+            return document.querySelector('#' + id);
+        }
+
+        /**
+         * Suche und gebe ein Button-Element nach Id aus
+         *
+         * @param id
+         * @returns {HTMLButtonElement}
+         */
+        function getButtonElementById(id) {
+            return document.querySelector('#' + id);
+        }
+
+        /**
+         * Suche und gebe ein Tabellen-Element nach Id aus
+         *
+         * @param id
+         * @returns {HTMLTableElement}
+         */
+        function getTableElementById(id) {
+            return document.querySelector('#' + id);
+        }
+
+        // Event-Listener wenn versucht wird das Formular abzusenden
+        document.querySelector('#formular').addEventListener('keydown', function (e) {
+            if(e.key === 'Enter') {
+                e.preventDefault();
+
+                checkAndSubmitForm();
+            }
+        });
+    </script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+</body>
+</html>
